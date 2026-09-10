@@ -19,39 +19,41 @@ set_target_properties(ip_filter PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
-enable_testing()
-
-find_package(Boost REQUIRED COMPONENTS unit_test_framework)
-
 add_library(ip_filter_lib STATIC ip_filter_lib.cpp)
 target_include_directories(ip_filter_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(ip_filter PRIVATE ip_filter_lib)
 
-add_executable(ip_filter_tests 
-    tests/test_main.cpp
-    tests/test_sort.cpp
-    tests/test_parse.cpp
-    tests/test_split.cpp)
-target_link_libraries(ip_filter_tests 
-    PRIVATE 
-        ip_filter_lib
-        Boost::unit_test_framework)
+option(BUILD_TESTS "Build Boost tests" ON)
+if (BUILD_TESTS)
+    enable_testing()
 
-add_test(
-    NAME split_should_split_ip_by_dots
-    COMMAND ip_filter_tests --run_test=split_test
-)
+    find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+    add_executable(ip_filter_tests 
+        tests/test_main.cpp
+        tests/test_sort.cpp
+        tests/test_parse.cpp
+        tests/test_split.cpp)
+    target_link_libraries(ip_filter_tests 
+        PRIVATE 
+            ip_filter_lib
+            Boost::unit_test_framework)
 
-add_test(
-    NAME parse_ip_should_convert_to_uint32
-    COMMAND ip_filter_tests --run_test=parse_test
-)
+    add_test(
+        NAME split_should_split_ip_by_dots
+        COMMAND ip_filter_tests --run_test=split_test
+    )
 
-add_test(
-    NAME sort_should_place_larger_ips_first
-    COMMAND ip_filter_tests --run_test=sort_test
-)
+    add_test(
+        NAME parse_ip_should_convert_to_uint32
+        COMMAND ip_filter_tests --run_test=parse_test
+    )
+
+    add_test(
+        NAME sort_should_place_larger_ips_first
+        COMMAND ip_filter_tests --run_test=sort_test
+    )
+endif()
 
 set(CPACK_PACKAGE_NAME "ip-filter")
 set(CPACK_PACKAGE_VENDOR "nom4")
