@@ -1,68 +1,78 @@
 name: IP Filter Release Build
 
 on:
-    push:
-        branches:
-            - main
-
-permissions:
-    contents: write
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
-    build:
-        name: Build on ${{ matrix.os }}
-        runs-on: ${{ matrix.os }}
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                include:
-                    - os: macos-latest
-                      package-extention: dmg
-                    - os: ubuntu-latest
-                      package-extention: deb
-        
-        steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v7
-            
-            - name: Configure CMake
-              run: |
-                cmake -S . -B build \
-                -DPATCH_VERSION=${{ github.run_number }} \
-                -DCMAKE_RELEASE_TYPE=Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Build Release
-              run: cmake --build build --config Release
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-test-dev
 
-            - name: Build Package
-              run: cmake --build build --target package --config Release
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPATCH_VERSION=${{ github.run_number }}
 
-            - name: Upload Package Artifact
-              uses: actions/upload-artifact@v7
-              with:
-                name: ip-filter-${{ runner.os }}
-                path: build/*.${{ matrix.package-extention }}
-                if-no-files-found: error
+      - name: Build
+        run: cmake --build build --config Release
 
-    release:
-        name: Create GitHub Release
-        needs: build
-        runs-on: ubuntu-latest
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure --verbose
 
-        steps:
-            - name: Download Artifact
-              uses: actions/download-artifact@v7
-              with:
-                path: artifacts
-            
-            - name: Create Release
-              uses: softprops/action-gh-release@v3
-              with:
-                token: ${{ secrets.GITHUB_TOKEN }}
-                tag_name: v1.0.${{ github.run_number }}
-                name: Release v1.0.${{ github.run_number }}
-                generate_release_notes: true
-                files:
-                    artifacts/ip-filter-macOS/*.dmg
-                    artifacts/ip-filter-Linux/*.deb
-    
+  package:
+    name: Build package
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-test-dev
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPATCH_VERSION=${{ github.run_number }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Build package
+        run: cmake --build build --target package --config Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ip-filter-deb
+          path: build/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: package
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*.deb
+          generate_release_notes: true
