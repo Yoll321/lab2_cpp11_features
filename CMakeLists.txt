@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(ip_filter)
 
-set(PATCH_VERSION CACHE STRING "1")
+set(PATCH_VERSION "1" CACHE STRING "Patch Version provided by GitHub")
 project(ip_filter
     VERSION 1.0.${PATCH_VERSION}
     LANGUAGES CXX)
