@@ -6,35 +6,9 @@
 #include <string>
 #include <vector>
 
+#include "ip_filter_lib.h"
+
 #define BYTES_IN_IP 4
-
-std::vector<std::string> split(const std::string &str, char d)
-{
-    std::vector<std::string> r;
-
-    std::string::size_type start = 0;
-    std::string::size_type stop = str.find_first_of(d);
-    while(stop != std::string::npos)
-    {
-        r.push_back(str.substr(start, stop - start));
-
-        start = stop + 1;
-        stop = str.find_first_of(d, start);
-    }
-
-    r.push_back(str.substr(start));
-
-    return r;
-}
-
-uint32_t parse_ip_to_int(const std::vector<std::string> &ip) {
-    uint32_t res = 0;
-    res += static_cast<uint32_t>(std::stoi(ip.at(0))) << 24;
-    res += stoi(ip.at(1)) << 16;
-    res += stoi(ip.at(2)) << 8;
-    res += stoi(ip.at(3));
-    return res;
-}
 
 void print_ip(std::vector<std::string> &ip) {
     std::cout << ip.at(0);

@@ -65,3 +65,4 @@ jobs:
                 files:
                     artifacts/ip-filter-macOS/*.dmg
                     artifacts/ip-filter-Linux/*.deb
+    
