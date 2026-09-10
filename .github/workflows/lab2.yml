@@ -2,8 +2,7 @@ name: IP Filter Release Build
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    branches: main
 
 jobs:
   test:
@@ -12,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -29,17 +28,24 @@ jobs:
         run: ctest --test-dir build --output-on-failure --verbose
 
   package:
-    name: Build package
+    name: Build on ${{ matrix.os }}
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: matrix.os
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            package_extention: dmg
+          - os: ubuntu-latest
+            package_extention: deb
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
           sudo apt-get install -y build-essential cmake libboost-test-dev
 
       - name: Configure CMake
@@ -52,27 +58,30 @@ jobs:
         run: cmake --build build --target package --config Release
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: ip-filter-deb
-          path: build/*.deb
+          name: ip-filter-${{ runner.os }}
+          path: build/*.${{ matrix.package_extention}}
           if-no-files-found: error
 
   release:
     name: Create GitHub Release
     needs: package
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          files: |
-            artifacts/**/*.deb
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
           generate_release_notes: true
+          files: |
+            artifacts/hello-world-Linux/*.deb
+            artifacts/hello-world-macOS/*.dmg
