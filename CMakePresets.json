@@ -1,0 +1,13 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "build-app",
+            "displayName": "Build ip_filter binary",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "PATCH_VERSION": "69"
+            }
+        }
+    ]
+}

@@ -1,0 +1,151 @@
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#define BYTES_IN_IP 4
+
+std::vector<std::string> split(const std::string &str, char d)
+{
+    std::vector<std::string> r;
+
+    std::string::size_type start = 0;
+    std::string::size_type stop = str.find_first_of(d);
+    while(stop != std::string::npos)
+    {
+        r.push_back(str.substr(start, stop - start));
+
+        start = stop + 1;
+        stop = str.find_first_of(d, start);
+    }
+
+    r.push_back(str.substr(start));
+
+    return r;
+}
+
+uint32_t parse_ip_to_int(const std::vector<std::string> &ip) {
+    uint32_t res = 0;
+    res += static_cast<uint32_t>(std::stoi(ip.at(0))) << 24;
+    res += stoi(ip.at(1)) << 16;
+    res += stoi(ip.at(2)) << 8;
+    res += stoi(ip.at(3));
+    return res;
+}
+
+void print_ip(std::vector<std::string> &ip) {
+    std::cout << ip.at(0);
+    for (int i = 1; i < BYTES_IN_IP; i++)
+        std::cout << '.' << ip.at(i);
+    std::cout << '\n';
+    return;
+}
+
+int main(int argc, char const *argv[])
+{
+    try
+    {
+        std::vector<std::vector<std::string> > ip_pool;
+
+        for(std::string line; std::getline(std::cin, line);)
+        {
+            std::vector<std::string> v = split(line, '\t');
+            ip_pool.push_back(split(v.at(0), '.'));
+        }
+
+        // TODO reverse lexicographical sort
+        std::sort(ip_pool.begin(), ip_pool.end(), 
+            [](const auto &ip1, const auto &ip2) {
+                return parse_ip_to_int(ip1) > parse_ip_to_int(ip2);
+            });
+
+        for (auto& ip : ip_pool) 
+        {
+            print_ip(ip);
+        }
+
+        // 222.173.235.246
+        // 222.130.177.64
+        // 222.82.198.61
+        // ...
+        // 1.70.44.170
+        // 1.29.168.152
+        // 1.1.234.8
+
+        // TODO filter by first byte and output
+        // ip = filter(1)
+        // for (auto &ip : ip_pool)
+        //     if (ip.at(0) == "1")
+        //         print_ip(ip);
+
+
+        // 1.231.69.33
+        // 1.87.203.225
+        // 1.70.44.170
+        // 1.29.168.152
+        // 1.1.234.8
+
+        // TODO filter by first and second bytes and output
+        // ip = filter(46, 70)
+        for (auto &ip : ip_pool)
+            if (ip.at(0) == "46" && ip.at(1) == "70")
+                print_ip(ip);
+
+        // 46.70.225.39
+        // 46.70.147.26
+        // 46.70.113.73
+        // 46.70.29.76
+
+        // TODO filter by any byte and output
+        // ip = filter_any(46)
+        for (auto &ip : ip_pool) {
+            bool to_print = false;
+            for (auto &byte : ip)
+                if (byte == "46")
+                    to_print = true;
+            if (to_print) print_ip(ip);
+        }
+
+        // 186.204.34.46
+        // 186.46.222.194
+        // 185.46.87.231
+        // 185.46.86.132
+        // 185.46.86.131
+        // 185.46.86.131
+        // 185.46.86.22
+        // 185.46.85.204
+        // 185.46.85.78
+        // 68.46.218.208
+        // 46.251.197.23
+        // 46.223.254.56
+        // 46.223.254.56
+        // 46.182.19.219
+        // 46.161.63.66
+        // 46.161.61.51
+        // 46.161.60.92
+        // 46.161.60.35
+        // 46.161.58.202
+        // 46.161.56.241
+        // 46.161.56.203
+        // 46.161.56.174
+        // 46.161.56.106
+        // 46.161.56.106
+        // 46.101.163.119
+        // 46.101.127.145
+        // 46.70.225.39
+        // 46.70.147.26
+        // 46.70.113.73
+        // 46.70.29.76
+        // 46.55.46.98
+        // 46.49.43.85
+        // 39.46.86.85
+        // 5.189.203.46
+    }
+    catch(const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return 0;
+}
