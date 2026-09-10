@@ -13,6 +13,10 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/ip_filter.tsv
     ${CMAKE_CURRENT_BINARY_DIR}/ip_filter.tsv
 )
+set_target_properties(ip_filter PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD REQUIRED ON
+)
 
 set(CPACK_PACKAGE_NAME "ip-filter")
 set(CPACK_PACKAGE_VENDOR "nom4")
