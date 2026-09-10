@@ -15,7 +15,7 @@ configure_file(
 )
 set_target_properties(ip_filter PROPERTIES
     CXX_STANDARD 17
-    CXX_STANDARD REQUIRED ON
+    CXX_STANDARD_REQUIRED ON
 )
 
 set(CPACK_PACKAGE_NAME "ip-filter")
