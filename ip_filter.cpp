@@ -51,9 +51,9 @@ int main(int argc, char const *argv[])
 
         // TODO filter by first byte and output
         // ip = filter(1)
-        // for (auto &ip : ip_pool)
-        //     if (ip.at(0) == "1")
-        //         print_ip(ip);
+        for (auto &ip : ip_pool)
+            if (ip.at(0) == "1")
+                print_ip(ip);
 
 
         // 1.231.69.33
@@ -62,7 +62,6 @@ int main(int argc, char const *argv[])
         // 1.29.168.152
         // 1.1.234.8
 
-        // TODO filter by first and second bytes and output
         // ip = filter(46, 70)
         for (auto &ip : ip_pool)
             if (ip.at(0) == "46" && ip.at(1) == "70")
@@ -73,7 +72,6 @@ int main(int argc, char const *argv[])
         // 46.70.113.73
         // 46.70.29.76
 
-        // TODO filter by any byte and output
         // ip = filter_any(46)
         for (auto &ip : ip_pool) {
             bool to_print = false;
