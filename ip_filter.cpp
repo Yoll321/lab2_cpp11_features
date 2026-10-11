@@ -5,29 +5,39 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "ip_filter_lib.h"
 
-#define BYTES_IN_IP 4
-
-void print_ip(std::vector<std::string> &ip) {
-    std::cout << ip.at(0);
-    for (int i = 1; i < BYTES_IN_IP; i++)
-        std::cout << '.' << ip.at(i);
-    std::cout << '\n';
-    return;
-}
+/*
+    add tuples
+*/
 
 int main(int argc, char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string> > ip_pool;
+        std::vector<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>> ip_pool;
 
         for(std::string line; std::getline(std::cin, line);)
         {
             std::vector<std::string> v = split(line, '\t');
-            ip_pool.push_back(split(v.at(0), '.'));
+            std::vector<std::string> ip_str = split(v.at(0), '.');
+            if (ip_str.size() != BYTES_IN_IP) {
+                std::cerr << "Incorrect ip: ";
+                for (size_t i = 0; i < ip_str.size() - 2; i++)
+                    std::cerr << ip_str[i] << '.';
+                std::cerr << ip_str[ip_str.size() - 1] << '\n';
+                exit(1);
+            }
+            std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> new_ip = 
+                std::make_tuple(
+                    static_cast<uint8_t>(stoi(ip_str[0])),
+                    static_cast<uint8_t>(stoi(ip_str[1])),
+                    static_cast<uint8_t>(stoi(ip_str[2])),
+                    static_cast<uint8_t>(stoi(ip_str[3]))
+                );
+            ip_pool.push_back(std::move(new_ip));
         }
 
         // TODO reverse lexicographical sort
@@ -49,10 +59,9 @@ int main(int argc, char const *argv[])
         // 1.29.168.152
         // 1.1.234.8
 
-        // TODO filter by first byte and output
         // ip = filter(1)
         for (auto &ip : ip_pool)
-            if (ip.at(0) == "1")
+            if (std::get<0>(ip) == 1)
                 print_ip(ip);
 
 
@@ -64,7 +73,7 @@ int main(int argc, char const *argv[])
 
         // ip = filter(46, 70)
         for (auto &ip : ip_pool)
-            if (ip.at(0) == "46" && ip.at(1) == "70")
+            if (std::get<0>(ip) == 46 && std::get<1>(ip) == 70)
                 print_ip(ip);
 
         // 46.70.225.39
@@ -74,11 +83,11 @@ int main(int argc, char const *argv[])
 
         // ip = filter_any(46)
         for (auto &ip : ip_pool) {
-            bool to_print = false;
-            for (auto &byte : ip)
-                if (byte == "46")
-                    to_print = true;
-            if (to_print) print_ip(ip);
+            if (std::get<0>(ip) == 46 ||
+                std::get<1>(ip) == 46 ||
+                std::get<2>(ip) == 46 ||
+                std::get<3>(ip) == 46)
+                print_ip(ip);
         }
 
         // 186.204.34.46

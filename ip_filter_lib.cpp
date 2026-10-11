@@ -22,20 +22,20 @@ std::vector<std::string> split(const std::string& str, char d)
     return result;
 }
 
-uint32_t parse_ip_to_int(const std::vector<std::string>& ip)
+uint32_t parse_ip_to_int(const std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>& ip)
 {
     uint32_t res = 0;
-    res += static_cast<uint32_t>(std::stoi(ip.at(0))) << 24;
-    res += static_cast<uint32_t>(std::stoi(ip.at(1))) << 16;
-    res += static_cast<uint32_t>(std::stoi(ip.at(2))) << 8;
-    res += static_cast<uint32_t>(std::stoi(ip.at(3)));
+    res += static_cast<uint32_t>(std::get<0>(ip)) << 24;
+    res += static_cast<uint32_t>(std::get<1>(ip)) << 16;
+    res += static_cast<uint32_t>(std::get<2>(ip)) << 8;
+    res += static_cast<uint32_t>(std::get<3>(ip));
     return res;
 }
 
-void print_ip(const std::vector<std::string>& ip)
+void print_ip(const std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>& ip)
 {
-    std::cout << ip.at(0);
-    for (size_t i = 1; i < ip.size(); ++i)
-        std::cout << '.' << ip.at(i);
-    std::cout << '\n';
+    std::cout << static_cast<unsigned int>(std::get<0>(ip)) << '.';
+    std::cout << static_cast<unsigned int>(std::get<1>(ip)) << '.';
+    std::cout << static_cast<unsigned int>(std::get<2>(ip)) << '.';
+    std::cout << static_cast<unsigned int>(std::get<3>(ip)) << '\n';
 }
